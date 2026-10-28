@@ -1,9 +1,12 @@
 {
-  "name": "q-server-next",
+  "name": "@chosan/server",
   "version": "1.0.0",
   "description": "带登录鉴权的个人文件服务器 CLI：浏览目录 / 拖拽上传 / 单文件直下 / 多文件与目录自动打 zip。Fastify5 + Vue3/Vite6。",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": ["file-server", "upload", "download", "zip", "cli", "static-server", "fastify"],
   "repository": {
     "type": "git",
