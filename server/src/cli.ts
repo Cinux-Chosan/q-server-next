@@ -41,7 +41,7 @@ export function parseArgs(argv: string[]): void {
     .option('-k, --kill <duration>', '自动退出时长（如 30m / 2h），默认常驻', undefined)
     .option('--hidden', '是否允许浏览/下载隐藏文件（.开头）', false)
     .option('-l, --limit <size>', '上传大小上限。支持缩写、大小写不敏感：如 200mb / 1g / 1G=1GB / 512k / 1m=1MB，纯数字按字节', (v) => parseSize(v ?? '200mb') || 200 * 1024 * 1024, 200 * 1024 * 1024)
-    .option('-t, --title <title>', '网页标题', 'q-server')
+    .option('-t, --title <title>', '网页标题', '@chosan/server')
     // 可重复：--user zhang/123 --user li/456
     .option('--user <pair...>', '登录账号，格式 username/password，可重复传', (v, acc: string[]) => acc.concat([v]), [] as string[]);
 
