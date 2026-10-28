@@ -3,7 +3,7 @@
 `q-server-nest`（@chosan/server）的 **1:1 功能现代复刻**。一个带登录鉴权的个人文件服务器 CLI：浏览器里浏览目录、上传、单文件直下、多文件/目录自动打包成 zip 下载。
 
 旧栈：NestJS 7 + Vue2 + express-session（2020 年）。
-新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，全部依赖均为周下载量数十万~千万级的活跃维护包。
+新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，单 npm 包发布，全局安装即用。
 
 ## 功能对照（与旧版一致）
 
@@ -19,25 +19,40 @@
 
 > 修复了旧版两个隐患：① 上传接口在旧版是空壳、没真正写盘，本版补全；② 登录 Cookie 用 HMAC-SHA256 签名，防篡改。
 
-## 快速开始
+## 安装与使用
+
+发布为单个 npm 包（前端已预构建打包在内，无需自己 build）：
 
 ```bash
-# 1. 装依赖（根目录一条命令，自动装 server + web）
-npm install
+npm i -g q-server-next
 
-# 2. 构建前端 + 编译后端
-npm run build
-
-# 3. 启动（参数透传，-- 后面跟 CLI 参数）
-npm start -- -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
+# 启动：把当前目录作为文件根目录，开启上传，设账号
+q-server -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
 ```
 
-开发模式（一条命令同时起 Fastify :8888 + Vite :5173，日志带前缀）：
+浏览器打开 `http://localhost:8888`。常用示例：
 ```bash
-npm run dev
+q-server                                  # 开放模式，当前目录，8888
+q-server -d ~/Downloads -u -l 2g         # 上传上限 2GB
+q-server --user alice/abc --user bob/456  # 多账号
+q-server -k 30m                           # 30 分钟后自动退出
 ```
 
-根目录脚本一览：`npm install`(装全部依赖) / `npm run dev`(前后端同启) / `npm run build`(构建) / `npm start -- ...`(启动)。
+## 从源码开发
+
+```bash
+npm install          # 装全部依赖（server + web 已合并为一个包）
+npm run dev          # 一条命令同时起 Fastify:8888 + Vite:5173
+npm run build        # 产出 server/dist 与 web/dist
+npm start -- ...     # 用刚构建的产物启动
+```
+
+## 作为 npm 包发布
+
+- 单包发布：根目录即发布包，`bin: q-server -> server/dist/index.js`。
+- `files` 仅包含 `server/dist` + `web/dist`，用户全局安装后无需构建前端。
+- `prepublishOnly` 会在 `npm publish` 前自动重新构建。
+- 发布：`npm login && npm publish`（包名 `q-server-next`，命令名 `q-server`）。
 
 ## 命令行参数
 
@@ -54,7 +69,7 @@ npm run dev
 
 示例：
 ```bash
-npm start -- -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
+q-server -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
 ```
 
 ## 技术选型（均为高周下载量活跃包）
@@ -73,19 +88,17 @@ npm start -- -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
 ## 目录结构
 
 ```
-q-server-next/
-├── server/            # Fastify 后端
-│   └── src/
-│       ├── cli.ts          # 命令行解析
-│       ├── config.ts       # 全局配置单例
-│       ├── app.ts         # 装配：插件/鉴权钩子/路由/静态托管
-│       ├── index.ts       # 入口
-│       ├── lib/           # 路径越权校验、HMAC Cookie、错误
-│       ├── services/      # 列目录、zip 流
-│       └── routes/        # auth / files / upload / download / sysConf
-└── web/              # Vue3 + Vite 前端（构建产物被 server 托管）
-    └── src/
-        ├── views/Login.vue
-        ├── views/FileManager.vue   # 面包屑+表格+多选+拖拽上传
-        └── api.ts
+q-server-next/            # 根即发布包（bin: q-server）
+├── server/src/           # Fastify 后端源码（编译到 server/dist）
+│   ├── cli.ts            # 命令行解析
+│   ├── config.ts         # 全局配置单例
+│   ├── app.ts            # 装配：插件/鉴权钩子/路由/静态托管
+│   ├── index.ts          # 入口（带 shebang）
+│   ├── lib/              # 路径越权校验、HMAC Cookie、错误
+│   ├── services/         # 列目录、zip 流
+│   └── routes/           # auth / files / upload / download / sysConf
+└── web/src/              # Vue3 + Vite 前端（构建到 web/dist，随包发布）
+    ├── views/Login.vue
+    ├── views/FileManager.vue   # 面包屑+表格+多选+拖拽上传
+    └── api.ts
 ```
