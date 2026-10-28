@@ -11,6 +11,7 @@ const selected = ref<Set<string>>(new Set()); // 选中的相对路径
 const loading = ref(false);
 const drag = ref(false);
 const uploadPct = ref(-1); // -1 表示未在上传
+const notFound = ref(false); // 当前目录不存在（中间层级被删也会命中）
 
 /** 从 URL 读取初始目录（支持深链分享：?dir=foo/bar） */
 function readInitialDir(): string {
@@ -61,8 +62,14 @@ const crumbs = computed(() => {
 
 async function load(dir = cwd.value) {
   loading.value = true;
+  notFound.value = false;
   const res = await api.list(dir);
-  files.value = res.result ?? [];
+  if (!res.success || (res as any).code === 404) {
+    files.value = [];
+    notFound.value = true;
+  } else {
+    files.value = res.result ?? [];
+  }
   selected.value = new Set();
   loading.value = false;
 }
@@ -187,7 +194,14 @@ onMounted(() => {
       <span v-if="loading" class="badge">加载中…</span>
     </div>
 
-    <table>
+    <div v-if="notFound" class="notfound">
+      <div class="notfound-icon">📂❌</div>
+      <div class="notfound-title">目录不存在或已被删除</div>
+      <div class="notfound-sub">你访问的路径（{{ cwd === '.' ? '根目录' : cwd }}）可能已被移除，或其中某一层级被删除。</div>
+      <button class="primary" @click="go('.')">返回根目录</button>
+    </div>
+
+    <table v-else>
       <thead>
         <tr>
           <th class="check" v-if="conf.uploadable || true"></th>
@@ -215,7 +229,7 @@ onMounted(() => {
           <td class="size">{{ f.isDir ? '—' : formatSize(f.size) }}</td>
           <td class="mtime">{{ new Date(f.modifiedAt).toLocaleString() }}</td>
         </tr>
-        <tr v-if="!loading && files.length === 0">
+        <tr v-if="!loading && files.length === 0 && !notFound">
           <td colspan="4" class="empty">空目录</td>
         </tr>
       </tbody>
