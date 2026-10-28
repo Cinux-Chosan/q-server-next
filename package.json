@@ -5,14 +5,18 @@
   "description": "现代版个人文件服务器 CLI —— q-server-nest 的 1:1 功能复刻，Fastify + Vue3/Vite 重写",
   "type": "module",
   "scripts": {
+    "setup": "npm --prefix server install && npm --prefix web install",
+    "postinstall": "npm run setup",
+    "dev": "concurrently -k -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
     "dev:server": "npm --prefix server run dev",
     "dev:web": "npm --prefix web run dev",
-    "build:web": "npm --prefix web run build",
-    "build:server": "npm --prefix server run build",
-    "build": "npm run build:web && npm run build:server",
-    "start": "npm --prefix server run start"
+    "build": "npm --prefix web run build && npm --prefix server run build",
+    "start": "node server/dist/index.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }
