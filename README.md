@@ -3,7 +3,7 @@
 `q-server-nest`（@chosan/server）的 **1:1 功能现代复刻**。一个带登录鉴权的个人文件服务器 CLI：浏览器里浏览目录、上传、单文件直下、多文件/目录自动打包成 zip 下载。
 
 旧栈：NestJS 7 + Vue2 + express-session（2020 年）。
-新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，单 npm 包发布，全局安装即用。
+新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，单 npm 包发布，全局安装即用，命令名 `server`。
 
 ## 功能对照（与旧版一致）
 
@@ -27,15 +27,15 @@
 npm i -g q-server-next
 
 # 启动：把当前目录作为文件根目录，开启上传，设账号
-q-server -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
+server -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
 ```
 
 浏览器打开 `http://localhost:8888`。常用示例：
 ```bash
-q-server                                  # 开放模式，当前目录，8888
-q-server -d ~/Downloads -u -l 2g         # 上传上限 2GB
-q-server --user alice/abc --user bob/456  # 多账号
-q-server -k 30m                           # 30 分钟后自动退出
+server                                  # 开放模式，当前目录，8888
+server -d ~/Downloads -u -l 2g         # 上传上限 2GB
+server --user alice/abc --user bob/456  # 多账号
+server -k 30m                           # 30 分钟后自动退出
 ```
 
 ## 从源码开发
@@ -49,10 +49,10 @@ npm start -- ...     # 用刚构建的产物启动
 
 ## 作为 npm 包发布
 
-- 单包发布：根目录即发布包，`bin: q-server -> server/dist/index.js`。
+- 单包发布：根目录即发布包，`bin: server -> server/dist/index.js`。
 - `files` 仅包含 `server/dist` + `web/dist`，用户全局安装后无需构建前端。
 - `prepublishOnly` 会在 `npm publish` 前自动重新构建。
-- 发布：`npm login && npm publish`（包名 `q-server-next`，命令名 `q-server`）。
+- 发布：`npm login && npm publish`（包名 `q-server-next`，命令名 `server`）。
 
 ## 命令行参数
 
@@ -69,7 +69,7 @@ npm start -- ...     # 用刚构建的产物启动
 
 示例：
 ```bash
-q-server -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
+server -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
 ```
 
 ## 技术选型（均为高周下载量活跃包）
@@ -88,7 +88,7 @@ q-server -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
 ## 目录结构
 
 ```
-q-server-next/            # 根即发布包（bin: q-server）
+q-server-next/            # 根即发布包（bin: server）
 ├── server/src/           # Fastify 后端源码（编译到 server/dist）
 │   ├── cli.ts            # 命令行解析
 │   ├── config.ts         # 全局配置单例
