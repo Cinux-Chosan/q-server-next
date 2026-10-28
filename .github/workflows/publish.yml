@@ -1,6 +1,6 @@
 name: Publish to npm
 
-# 推送到 main 自动发布：发布前自动 patch 升级版本号，保证每次都是新版本，不会被跳过。
+# 推送到 main 自动发布：从 npm 拉最新版本号 patch+1 后发布，不依赖 git。
 on:
   push:
     branches: [main]
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm Trusted Publisher（OIDC）需要；用 token 时也可保留
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +28,17 @@ jobs:
       - name: Build (web + server)
         run: npm run build
 
-      - name: Bump patch and publish to npm
+      - name: Bump version from npm latest and publish
         run: |
-          # 自动 patch 升级（不产生 git commit/tag，避免触发工作流放循环）
-          npm version patch --no-git-tag-version
+          set -e
           PKG=$(node -p "require('./package.json').name")
-          VER=$(node -p "require('./package.json').version")
-          echo "发布 $PKG@$VER"
+          # 从 npm 拉已发布的最新版本；没有则从 0.0.0 起
+          LATEST=$(npm view "$PKG" version 2>/dev/null || echo "0.0.0")
+          # patch +1
+          NEXT=$(node -e "const [m,p,r]=String(process.argv[1]).split('.').map(Number); console.log(m+'.'+p+'.'+(r+1))" "$LATEST")
+          # 直接写 package.json，不依赖 git / npm version 的干净树检查
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version=process.argv[1];fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')" "$NEXT"
+          echo "发布 $PKG@$NEXT"
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
