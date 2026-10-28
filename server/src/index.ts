@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { parseArgs } from './cli.js';
 import { buildApp } from './app.js';
 import { config } from './config.js';
