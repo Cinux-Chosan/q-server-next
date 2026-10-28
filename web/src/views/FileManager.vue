@@ -12,6 +12,22 @@ const loading = ref(false);
 const drag = ref(false);
 const uploadPct = ref(-1); // -1 表示未在上传
 
+/** 从 URL 读取初始目录（支持深链分享：?dir=foo/bar） */
+function readInitialDir(): string {
+  const q = new URLSearchParams(window.location.search).get('dir');
+  if (!q) return '.';
+  const d = q.replace(/^\.\//, '').replace(/\/+$/, '');
+  return d || '.';
+}
+
+/** 把当前目录同步到地址栏（不刷新、不污染历史记录） */
+function syncUrl(): void {
+  const url = new URL(window.location.href);
+  if (cwd.value === '.') url.searchParams.delete('dir');
+  else url.searchParams.set('dir', cwd.value);
+  window.history.replaceState(null, '', url.toString());
+}
+
 // 面包屑：把 cwd 拆成分段
 const crumbs = computed(() => {
   if (cwd.value === '.') return [{ label: '根目录', path: '.' }];
@@ -36,11 +52,13 @@ async function load(dir = cwd.value) {
 function open(item: FileItem) {
   if (!item.isDir) return;
   cwd.value = item.path;
+  syncUrl();
   void load(item.path);
 }
 
 function go(path: string) {
   cwd.value = path;
+  syncUrl();
   void load(path);
 }
 
@@ -101,7 +119,12 @@ function iconOf(item: FileItem) {
   return '📄';
 }
 
-onMounted(() => load('.'));
+onMounted(() => {
+  const initial = readInitialDir();
+  cwd.value = initial;
+  syncUrl();
+  void load(initial);
+});
 </script>
 
 <template>
