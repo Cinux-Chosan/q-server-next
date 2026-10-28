@@ -20,12 +20,30 @@ function readInitialDir(): string {
   return d || '.';
 }
 
-/** 把当前目录同步到地址栏（不刷新、不污染历史记录） */
+// 初始加载不往历史里再压一条；之后每次进目录都 push，支持浏览器返回/前进
+let skipNextPush = true;
+
+/** 把当前目录同步到地址栏；进入新目录时压入浏览器历史 */
 function syncUrl(): void {
   const url = new URL(window.location.href);
   if (cwd.value === '.') url.searchParams.delete('dir');
   else url.searchParams.set('dir', cwd.value);
-  window.history.replaceState(null, '', url.toString());
+  if (skipNextPush) {
+    skipNextPush = false;
+    window.history.replaceState(null, '', url.toString());
+  } else {
+    window.history.pushState(null, '', url.toString());
+  }
+}
+
+/** 浏览器返回/前进时，按 URL 里的 dir 回退目录 */
+function onPopState(): void {
+  const q = new URLSearchParams(window.location.search).get('dir');
+  const dir = q ? q.replace(/\/+$/, '') || '.' : '.';
+  if (dir !== cwd.value) {
+    cwd.value = dir;
+    void load(dir);
+  }
 }
 
 // 面包屑：把 cwd 拆成分段
@@ -124,6 +142,7 @@ onMounted(() => {
   cwd.value = initial;
   syncUrl();
   void load(initial);
+  window.addEventListener('popstate', onPopState);
 });
 </script>
 
