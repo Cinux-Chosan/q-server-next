@@ -190,7 +190,7 @@ onMounted(() => {
         <input type="file" multiple hidden @change="onPickFiles" />
       </label>
       <span class="spacer"></span>
-      <span class="badge">上限 {{ formatSize(conf.limit) }}</span>
+      <span v-if="conf.uploadable" class="badge">上传上限 {{ formatSize(conf.limit) }}</span>
       <span v-if="loading" class="badge">加载中…</span>
     </div>
 
