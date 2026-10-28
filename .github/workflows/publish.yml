@@ -1,7 +1,6 @@
 name: Publish to npm
 
-# 推送到 main 时自动发布；同版本已存在则跳过（避免重复发布报错）。
-# 发布流程：改 package.json 版本号（如 npm version patch）并 push，即触发本工作流。
+# 推送到 main 自动发布：发布前自动 patch 升级版本号，保证每次都是新版本，不会被跳过。
 on:
   push:
     branches: [main]
@@ -29,16 +28,13 @@ jobs:
       - name: Build (web + server)
         run: npm run build
 
-      - name: Publish to npm
+      - name: Bump patch and publish to npm
         run: |
+          # 自动 patch 升级（不产生 git commit/tag，避免触发工作流放循环）
+          npm version patch --no-git-tag-version
           PKG=$(node -p "require('./package.json').name")
           VER=$(node -p "require('./package.json').version")
-          echo "准备发布 $PKG@$VER"
-          # 该版本已发布过就跳过
-          if npm view "$PKG@$VER" version >/dev/null 2>&1; then
-            echo "::notice::$PKG@$VER 已存在于 npm，跳过发布"
-            exit 0
-          fi
+          echo "发布 $PKG@$VER"
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
