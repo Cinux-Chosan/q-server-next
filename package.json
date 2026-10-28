@@ -10,7 +10,7 @@
     "url": "git+https://github.com/Cinux-Chosan/q-server-next.git"
   },
   "bin": {
-    "q-server": "server/dist/index.js"
+    "server": "server/dist/index.js"
   },
   "files": [
     "server/dist",
