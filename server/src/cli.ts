@@ -32,7 +32,7 @@ export function parseArgs(argv: string[]): void {
   const program = new Command();
 
   program
-    .name('q-server')
+    .name('server')
     .description('现代版个人文件服务器：浏览 / 上传 / 打包下载')
     .version('1.0.0')
     .option('-p, --port <number>', '监听端口', (v) => parseInt(v ?? '8888', 10), 8888)
