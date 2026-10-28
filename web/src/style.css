@@ -142,3 +142,14 @@ td.check, th.check { width: 36px; }
 
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--panel-2); color: var(--muted); }
 .badge.ok { color: var(--ok); }
+
+.notfound {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  text-align: center;
+}
+.notfound-icon { font-size: 34px; margin-bottom: 10px; }
+.notfound-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.notfound-sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
