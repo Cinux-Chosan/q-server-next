@@ -1,0 +1,44 @@
+name: Publish to npm
+
+# 推送到 main 时自动发布；同版本已存在则跳过（避免重复发布报错）。
+# 发布流程：改 package.json 版本号（如 npm version patch）并 push，即触发本工作流。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm Trusted Publisher（OIDC）需要；用 token 时也可保留
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (web + server)
+        run: npm run build
+
+      - name: Publish to npm
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VER=$(node -p "require('./package.json').version")
+          echo "准备发布 $PKG@$VER"
+          # 该版本已发布过就跳过
+          if npm view "$PKG@$VER" version >/dev/null 2>&1; then
+            echo "::notice::$PKG@$VER 已存在于 npm，跳过发布"
+            exit 0
+          fi
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
