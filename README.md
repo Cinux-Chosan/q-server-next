@@ -22,23 +22,22 @@
 ## 快速开始
 
 ```bash
-# 1. 装依赖（两端）
-npm --prefix server install
-npm --prefix web install
+# 1. 装依赖（根目录一条命令，自动装 server + web）
+npm install
 
-# 2. 构建前端产物（输出到 web/dist，server 会自动托管）
-npm --prefix web run build
+# 2. 构建前端 + 编译后端
+npm run build
 
-# 3. 编译并启动
-npm --prefix server run build
-node server/dist/index.js -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
+# 3. 启动（参数透传，-- 后面跟 CLI 参数）
+npm start -- -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
 ```
 
-开发模式（前后端分离热更新）：
+开发模式（一条命令同时起 Fastify :8888 + Vite :5173，日志带前缀）：
 ```bash
-npm --prefix server run dev    # Fastify :8888
-npm --prefix web run dev        # Vite :5173，/api 自动代理到 8888
+npm run dev
 ```
+
+根目录脚本一览：`npm install`(装全部依赖) / `npm run dev`(前后端同启) / `npm run build`(构建) / `npm start -- ...`(启动)。
 
 ## 命令行参数
 
@@ -55,7 +54,7 @@ npm --prefix web run dev        # Vite :5173，/api 自动代理到 8888
 
 示例：
 ```bash
-node server/dist/index.js -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
+npm start -- -p 9000 -d ~/Downloads -u --user alice/abc123 --user bob/456
 ```
 
 ## 技术选型（均为高周下载量活跃包）
@@ -69,6 +68,7 @@ node server/dist/index.js -p 9000 -d ~/Downloads -u --user alice/abc123 --user b
 | 打包 zip | `archiver` ^7 | 流式 zip |
 | 大小/时长解析 | `bytes` / `ms` | 沿用 |
 | 前端框架 | `vue` ^3 + `vite` ^6 | 替代 Vue2 + vue-cli |
+| 并行脚本 | `concurrently` ^9 | 一条命令同时起前后端 |
 
 ## 目录结构
 
