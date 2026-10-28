@@ -9,6 +9,20 @@ const toBytes = bytes as unknown as (s: string) => number;
 const toMs = ms as unknown as (s: string) => number;
 
 /**
+ * 解析大小字符串。
+ * bytes 包本身要求带 b 后缀才按倍数换算（裸写 1g 会被当成 1 字节），
+ * 这里补全缩写：大小写不敏感，k/m/g/t/p 后可省略 b。
+ *   1024 -> 1024 B ; 512k / 512K -> 512 KB ; 1m / 1M / 1mb -> 1 MB ; 1g / 1G / 1gb -> 1 GB
+ */
+function parseSize(s: string): number {
+  const m = String(s).trim().match(/^(\d+(?:\.\d+)?)\s*([kmgtp]?)(b?)$/i);
+  if (!m) return NaN;
+  const [, num, unit] = m;
+  if (!unit) return Number(num); // 纯数字按字节
+  return toBytes(`${num}${unit.toLowerCase()}b`);
+}
+
+/**
  * 解析命令行参数，填充全局 config。
  * 设计目标与旧版 q-server-nest 完全一致：
  *   -p 端口 / -d 根目录 / -u 开上传 / -k 自动退出 / --hidden 显示隐藏文件
@@ -26,7 +40,7 @@ export function parseArgs(argv: string[]): void {
     .option('-u, --upload', '是否启用上传功能', false)
     .option('-k, --kill <duration>', '自动退出时长（如 30m / 2h），默认常驻', undefined)
     .option('--hidden', '是否允许浏览/下载隐藏文件（.开头）', false)
-    .option('-l, --limit <size>', '上传大小上限（如 200mb）', (v) => toBytes(v ?? '200mb') || 200 * 1024 * 1024, 200 * 1024 * 1024)
+    .option('-l, --limit <size>', '上传大小上限。支持缩写、大小写不敏感：如 200mb / 1g / 1G=1GB / 512k / 1m=1MB，纯数字按字节', (v) => parseSize(v ?? '200mb') || 200 * 1024 * 1024, 200 * 1024 * 1024)
     .option('-t, --title <title>', '网页标题', 'q-server')
     // 可重复：--user zhang/123 --user li/456
     .option('--user <pair...>', '登录账号，格式 username/password，可重复传', (v, acc: string[]) => acc.concat([v]), [] as string[]);
