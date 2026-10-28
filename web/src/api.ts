@@ -45,7 +45,7 @@ export const api = {
     post<{ success: boolean; result: boolean; message: string }>('/login', { username, password }),
   logout: () => post<{ success: boolean }>('/logout'),
   list: (dir: string) =>
-    post<{ success: boolean; result: FileItem[]; message?: string }>('/files', { dir }),
+    post<{ success: boolean; result: FileItem[]; message?: string; code?: number }>('/files', { dir }),
   /** 提交下载任务后，直接用浏览器跳转触发下载 */
   download: async (list: string[]) => {
     const res = await post<{ success: boolean; result: string }>('/download', { downloadList: list });
