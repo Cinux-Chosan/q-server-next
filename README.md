@@ -3,7 +3,7 @@
 `q-server-nest`（@chosan/server）的 **1:1 功能现代复刻**。一个带登录鉴权的个人文件服务器 CLI：浏览器里浏览目录、上传、单文件直下、多文件/目录自动打包成 zip 下载。
 
 旧栈：NestJS 7 + Vue2 + express-session（2020 年）。
-新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，单 npm 包发布，全局安装即用，命令名 `server`。
+新栈：**Fastify 5 + Vue 3 + Vite 6 + TypeScript 5**，单 npm 包 `@chosan/server` 发布，全局安装即用，命令名 `server`。
 
 ## 功能对照（与旧版一致）
 
@@ -24,7 +24,7 @@
 发布为单个 npm 包（前端已预构建打包在内，无需自己 build）：
 
 ```bash
-npm i -g q-server-next
+npm i -g @chosan/server
 
 # 启动：把当前目录作为文件根目录，开启上传，设账号
 server -p 8888 -d . -u --user zhang/123 -t "我的文件服务"
@@ -52,7 +52,7 @@ npm start -- ...     # 用刚构建的产物启动
 - 单包发布：根目录即发布包，`bin: server -> server/dist/index.js`。
 - `files` 仅包含 `server/dist` + `web/dist`，用户全局安装后无需构建前端。
 - `prepublishOnly` 会在 `npm publish` 前自动重新构建。
-- 发布：`npm login && npm publish`（包名 `q-server-next`，命令名 `server`）。
+- 发布：`npm login && npm publish`（包名 `@chosan/server`，已设 `publishConfig.access=public`；命令名 `server`）。
 
 ## 命令行参数
 
